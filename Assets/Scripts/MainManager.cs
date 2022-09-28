@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -12,16 +13,19 @@ public class MainManager : MonoBehaviour
 
     public Text ScoreText;
     public GameObject GameOverText;
+    public Text bestScoreText;
     
     private bool m_Started = false;
     private int m_Points;
     
     private bool m_GameOver = false;
 
-    
+
     // Start is called before the first frame update
     void Start()
     {
+        LoadBestScoreText(); 
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -66,11 +70,32 @@ public class MainManager : MonoBehaviour
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
+        if (m_Points > MenuManager.Instance.maxScorePoints)
+        {
+            MenuManager.Instance.maxScorePoints = m_Points;
+            MenuManager.Instance.maxScoreName = MenuManager.Instance.playerName;
+            LoadBestScoreText();
+        }
     }
 
     public void GameOver()
     {
+        if (m_Points > MenuManager.Instance.maxScorePoints)
+        {
+            MenuManager.Instance.maxScorePoints = m_Points;
+            MenuManager.Instance.maxScoreName = MenuManager.Instance.playerName;
+            MenuManager.Instance.SaveMaxScore();
+            LoadBestScoreText();
+        }
         m_GameOver = true;
         GameOverText.SetActive(true);
+    }
+
+    private void LoadBestScoreText()
+    {
+        if (MenuManager.Instance.maxScoreName != "" && MenuManager.Instance.maxScorePoints > 0)
+        {
+            bestScoreText.text = "Best Score : " + MenuManager.Instance.maxScoreName + " : " + MenuManager.Instance.maxScorePoints;
+        }
     }
 }
